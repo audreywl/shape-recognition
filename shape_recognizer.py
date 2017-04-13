@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -18,14 +20,10 @@ class ShapeRecognizer(object):
         rospy.Subscriber("/camera/image_raw", Image, self.process_image)
         cv2.namedWindow('threshold_image')
         self.edge_detected = None
-        # self.hsv_lb = np.array([0, 0, 0]) # hsv lower bound
-        # cv2.createTrackbar('H lb', 'threshold_image', 0, 255, self.set_h_lb)
-        # cv2.createTrackbar('S lb', 'threshold_image', 0, 255, self.set_s_lb)
-        # cv2.createTrackbar('V lb', 'threshold_image', 0, 255, self.set_v_lb)
-        # self.hsv_ub = np.array([255, 255, 255]) # hsv upper bound
-        # cv2.createTrackbar('H ub', 'threshold_image', 0, 255, self.set_h_ub)
-        # cv2.createTrackbar('S ub', 'threshold_image', 0, 255, self.set_s_ub)
-        # cv2.createTrackbar('V ub', 'threshold_image', 0, 255, self.set_v_ub)
+        cv2.createTrackbar('MinVal', 'threshold_image', 50, 300, self.set_minVal)
+        cv2.createTrackbar('MaxVal', 'threshold_image', 87, 300, self.set_maxVal)
+        self.minVal = 50
+        self.maxVal = 87
 
 
     def process_image(self, msg):
@@ -33,12 +31,20 @@ class ShapeRecognizer(object):
             called cv_image for subsequent processing """
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
 
-        self.hsv_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2HSV)
-        self.binary_image = cv2.inRange(self.hsv_image, 
-            (25,176,77), 
-            (158,255,236))
+        self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
+        # self.binary_image = cv2.inRange(self.hsv_image, 
+        #     (25,176,77), 
+        #     (158,255,236))
 
-        self.edge_detected = cv2.Canny(self.cv_image,100,200)
+        self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
+
+    def set_minVal(self, val):
+        """ set hue lower bound """
+        self.minVal = val
+
+    def set_maxVal(self, val):
+        """ set saturation lower bound """
+        self.maxVal = val
 
 
         # left_top, right_bottom = self.sign_bounding_box()
@@ -106,7 +112,7 @@ class ShapeRecognizer(object):
 
             if not self.cv_image is None:
                 cv2.imshow('video_window', self.cv_image)
-                cv2.imshow('video_window2', self.cropped_sign)
+                cv2.imshow('video_window2', self.edge_detected)
                 cv2.waitKey(5)
             r.sleep()
 
