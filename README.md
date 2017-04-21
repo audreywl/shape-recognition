@@ -10,3 +10,8 @@ https://www2.eecs.berkeley.edu/Pubs/TechRpts/2001/CSD-01-1128.pdf
 https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
 
 http://docs.opencv.org/trunk/da/d22/tutorial_py_canny.html
+
+
+
+## Blog Posts:
+http://comprobofinal.blogspot.com/2017/04/first-algorithm-implementation.html
