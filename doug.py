@@ -21,36 +21,8 @@ def process_image(img):
 	cv2.createTrackbar('S ub', 'threshold_image', 245, 255, set_s_ub)
 	cv2.createTrackbar('V ub', 'threshold_image', 245, 255, set_v_ub)
 
-
-	contours,_ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) #we do contours to make sure subsequent points are neighbors -
+ #we do contours to make sure subsequent points are neighbors -
 	# CV_RETR_EXTERNAL because we only want one contour, and CV_CHAIN_APPROX_NONE b/c we don't want to compress by finding extrema, we want all the pointsg
-	hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-	gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-	binary_image = cv2.inRange(cv_image, hsv_lb, hsv_ub)
-
-def set_h_lb(self, val):
-	""" set hue lower bound """
-	hsv_lb[0] = val
-
-def set_s_lb(self, val):
-	""" set saturation lower bound """
-	hsv_lb[1] = val
-
-def set_v_lb(self, val):
-	""" set value lower bound """
-	hsv_lb[2] = val
-
-def set_h_ub(self, val):
-	""" set hue upper bound """
-	hsv_ub[0] = val
-
-def set_s_ub(self, val):
-	""" set saturation upper bound """
-	hsv_ub[1] = val
-
-def set_v_ub(self, val):
-	""" set value upper bound """
-	hsv_ub[2] = val
 
 
 
