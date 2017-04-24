@@ -4,7 +4,7 @@
 
 import math
 
-def process_image(img)
+def process_image(img):
 	cv_image = None                        # the latest image from the camera
 	binary_image = None
 

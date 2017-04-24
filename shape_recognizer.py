@@ -24,14 +24,53 @@ class ShapeRecognizer(object):
         cv2.createTrackbar('MaxVal', 'threshold_image', 87, 300, self.set_maxVal)
         self.minVal = 50
         self.maxVal = 87
+        self.test_image = cv2.imread("./circle_base.png",-1)
+        if self.test_image:
+            self.test_image = cv2.medianBlur(img,5)
+            self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
 
+
+
+    def distance(endpoints, point):
+        """computes the perpendicular distance between a point a line defined by two endpoints"""
+        start = endpoints[0]
+        end = endpoints[1]
+        dist_to_start = math.sqrt((point[0]-start[0])**2 + (point[1]-start[1])**2)
+        angle_of_big_line = math.atan2((end[1]-start[1]),(end[0]-start[0]))
+        angle_to_point = math.atan2((start[1]-point[1]),(start[0]-point[0]))
+        start_angle = angle_of_big_line-angle_to_point
+        perp_distance = dist_to_start*math.sin(start_angle)
+        return perp_distance
+
+
+    def dp(point_list, epsilon):
+        max_distance = 0
+        furthest_point = None
+        for i in point_list[1:-1]:
+            dist = distance((point_list[0],point_list[-1]), point_list[i])
+            if dist>max_distance:
+                max_distance = dist
+                furthest_point = i
+        if max_distance > epsilon:
+            new_line_1 = point_list[0:i+1]
+            new_line_2 = point_list[i:-1]
+            result_list_1 = dp(new_line_1, epsilon)
+            result_list_2 = dp(new_line_2, epsilon)
+            return result_list_1[0:-1].append(result_list_2)
+        else:
+            return [point_list[0], point_list[-1]]
 
     def process_image(self, msg):
         """ Process image messages from ROS and stash them in an attribute
             called cv_image for subsequent processing """
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+        self.cv_image = cv2.medianBlur(img,5)
+        self.gray_image = cv2.adaptiveThreshold(self.cv_image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+            cv2.THRESH_BINARY,11,2)
+        # self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
 
-        self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
+
+
         # self.binary_image = cv2.inRange(self.hsv_image, 
         #     (25,176,77), 
         #     (158,255,236))
@@ -39,6 +78,8 @@ class ShapeRecognizer(object):
         self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
         _, self.contours, self.contour_hierarchy  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         self.contour_image = cv2.drawContours(self.cv_image, self.contours, -1, (0,255,0), 3)
+        print dp(self.edge_detected, 1)
+
 
     def set_minVal(self, val):
         """ set hue lower bound """
@@ -106,6 +147,9 @@ class ShapeRecognizer(object):
     # def set_v_ub(self, val):
     #     """ set value upper bound """
     #     self.hsv_ub[2] = val
+
+
+
 
     def run(self):
         """ The main run loop"""
