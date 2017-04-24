@@ -37,6 +37,8 @@ class ShapeRecognizer(object):
         #     (158,255,236))
 
         self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
+        _, self.contours, self.contour_hierarchy  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        self.contour_image = cv2.drawContours(self.cv_image, self.contours, -1, (0,255,0), 3)
 
     def set_minVal(self, val):
         """ set hue lower bound """
@@ -112,7 +114,7 @@ class ShapeRecognizer(object):
 
             if not self.cv_image is None:
                 cv2.imshow('video_window', self.cv_image)
-                cv2.imshow('video_window2', self.edge_detected)
+                cv2.imshow('video_window2', self.contour_image)
                 cv2.waitKey(5)
             r.sleep()
 
