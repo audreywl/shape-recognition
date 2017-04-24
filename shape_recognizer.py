@@ -25,9 +25,10 @@ class ShapeRecognizer(object):
         self.minVal = 50
         self.maxVal = 87
         self.test_image = cv2.imread("./circle_base.png",-1)
-        if self.test_image:
-            self.test_image = cv2.medianBlur(img,5)
-            self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
+        # if self.test_image:
+        self.test_image = cv2.medianBlur(self.test_image,5)
+        self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
+
 
 
 
@@ -64,7 +65,7 @@ class ShapeRecognizer(object):
         """ Process image messages from ROS and stash them in an attribute
             called cv_image for subsequent processing """
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-        self.cv_image = cv2.medianBlur(img,5)
+        self.cv_image = cv2.medianBlur(self.cv_image,5)
         self.gray_image = cv2.adaptiveThreshold(self.cv_image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
             cv2.THRESH_BINARY,11,2)
         # self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
@@ -77,7 +78,7 @@ class ShapeRecognizer(object):
 
         self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
         
-        print dp(self.edge_detected, 1)
+        
 
     def set_minVal(self, val):
         """ set hue lower bound """
@@ -152,6 +153,8 @@ class ShapeRecognizer(object):
     def run(self):
         """ The main run loop"""
         r = rospy.Rate(10)
+
+        print dp(self.edge_detected, 1)
         while not rospy.is_shutdown():
 
             if not self.cv_image is None:
