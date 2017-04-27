@@ -15,3 +15,4 @@ http://docs.opencv.org/trunk/da/d22/tutorial_py_canny.html
 
 ## Blog Posts:
 http://comprobofinal.blogspot.com/2017/04/first-algorithm-implementation.html
+http://comprobofinal.blogspot.com/2017/04/blog-post-2.html
