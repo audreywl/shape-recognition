@@ -7,7 +7,6 @@ import cv2
 import numpy as np
 import math
 import sys
-<<<<<<< HEAD
 
 sys.setrecursionlimit(1500)
 
@@ -37,9 +36,9 @@ def dp(point_list, epsilon):
     max_distance = 0
     # print len(point_list)
     furthest_point = None
-    print 'endpoints', point_list[0], point_list[-1]
+    #print 'endpoints', point_list[0], point_list[-1]
     for i in range(len(point_list[1:-1])):
-    	print point_list[i]
+    	#print point_list[i]
     	# print i[0][0]
     	# print(i,len(point_list))
         dist = distance((point_list[0],point_list[-1]), point_list[i][0])
@@ -66,8 +65,8 @@ def dp(point_list, epsilon):
         	# print "listen"
         	return result_list_2
     else:
-    	print 'end'
-    	print [point_list[0], point_list[-1]]
+    	#print 'end'
+    	#print [point_list[0], point_list[-1]]
         return [point_list[0], point_list[-1]]
 
 
@@ -94,12 +93,12 @@ def shape_trainer(trainImage):
 	res = []
 	vals = []
 	# print contours[0]
-	print len(contours)
+	#print len(contours)
 	for i in range(len(contours)):
 		#print contours[i]
 		#print np.squeeze(contours[i])[0][0]
 		#temp = dp(np.squeeze(contours[i]), 474)
-		temp = dp(np.squeeze(contours[i]), 40)
+		temp = dp(contours[i], 40)
 		# if temp:
 		# print temp
 		if temp:
