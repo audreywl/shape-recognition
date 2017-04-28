@@ -41,7 +41,7 @@ def distance(endpoints, point):
 def dp(point_list, epsilon):
 	max_distance = 0
 	furthest_point = None
-	for i in point_list[1:-1]:
+	for i in range(len(point_list[1:-1])):
 		dist = distance((point_list[0],point_list[-1]), point_list[i])
 		if dist>max_distance:
 			max_distance = dist
