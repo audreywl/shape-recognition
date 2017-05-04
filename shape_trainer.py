@@ -79,8 +79,10 @@ def shape_trainer(trainImage):
     minVal = 50
     maxVal = 87
     test_image = cv2.imread(trainImage,-1)
-    edge_path = edge_detector(trainImage)
-    edge_detected = cv2.imread(edge_path,0)
+    edge_detected = cv2.Canny(test_image,minVal,maxVal)
+    #where the code differs if we could use our self-designed functions
+    # edge_path = edge_detector(trainImage)
+    # edge_detected = cv2.imread(edge_path,0)
     if cv2.__version__.startswith('3.'):
          _, contours, contour_hierarchy  = cv2.findContours(edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     else:
