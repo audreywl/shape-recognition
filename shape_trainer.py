@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import math
 import sys
+from edge_detector import edge_detector
 
 
 def distance(endpoints, point): 
@@ -68,7 +69,13 @@ def shape_trainer(trainImage):
     minVal = 50
     maxVal = 87
     test_image = cv2.imread(trainImage,-1)
-    edge_detected = cv2.Canny(test_image,minVal,maxVal)
+    edge_path = edge_detector(trainImage)
+    edge_detected = cv2.imread(edge_path,0)
+    # print edge_detected
+    # edge_detected = edge_detected.astype(np.float32)
+    # print edge_detected
+    # edge_detected = cv2.cvtColor(edge_detected,cv2.COLOR_BGR2GRAY)
+    # edge_detected = cv2.Canny(test_image,minVal,maxVal)
     if cv2.__version__.startswith('3.'):
          _, contours, contour_hierarchy  = cv2.findContours(edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     else:
@@ -84,15 +91,16 @@ def shape_trainer(trainImage):
             cv2.waitKey(0)
         
         res.append(len(temp))
+        # res.append(temp)
         
     return res
 
 
 if __name__ == '__main__':
     sys.setrecursionlimit(2000)
-    print shape_trainer("./circle_base.png")
+    # print shape_trainer("./circle_base.png")
     # print shape_trainer("./multi_image.png")
-    # print shape_trainer("./square_base.png") #works best at 177.9
+    print shape_trainer("./square_base.png") #works best at 177.9
     # print shape_trainer("./squares_base.png")
     # print shape_trainer("./pentagon_base.png")
 
