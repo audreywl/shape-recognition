@@ -90,8 +90,15 @@ def shape_trainer(trainImage):
 
 if __name__ == '__main__':
     sys.setrecursionlimit(2000)
-    # print shape_trainer("./circle_base.png")
+    print shape_trainer("./circle_base.png")
     # print shape_trainer("./multi_image.png")
     # print shape_trainer("./square_base.png") #works best at 177.9
-    print shape_trainer("./squares_base.png")
+    # print shape_trainer("./squares_base.png")
     # print shape_trainer("./pentagon_base.png")
+
+    """
+    Brief Estimate: 
+    - circle: 42 (only tested once)
+    - square: 5 (consistent)
+    - triangle: 7(only tested once)
+    """
