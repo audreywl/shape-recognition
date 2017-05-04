@@ -18,28 +18,17 @@
 		<!-- Header -->
 			<section id="header">
 				<header>
-					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
-					<h1 id="logo"><a href="#">Willis Corto</a></h1>
-					<p>I got reprogrammed by a rogue AI<br />
-					and now I'm totally cray</p>
+					<br><br><br><br><br>
+					<h1 id="logo"><a href="#">Learn More</a></h1>
 				</header>
 				<nav id="nav">
 					<ul>
 						<li><a href="#one" class="active">About</a></li>
-						<li><a href="#two">Things I Can Do</a></li>
-						<li><a href="#three">A Few Accomplishments</a></li>
-						<li><a href="#four">Contact</a></li>
+						<li><a href="#two">Implementation</a></li>
+						<li><a href="#three">Project Updates</a></li>
+						<li><a href="#four">About Us</a></li>
 					</ul>
 				</nav>
-				<footer>
-					<ul class="icons">
-						<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
-						<li><a href="#" class="icon fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
-					</ul>
-				</footer>
 			</section>
 
 		<!-- Wrapper -->
@@ -55,23 +44,46 @@
 										<h2>Shape Recognition</h2>
 										<p> by Gabe Butterick and Audrey Lewis</p>
 									</header>
-									<p>Faucibus sed lobortis aliquam lorem blandit. Lorem eu nunc metus col. Commodo id in arcu ante lorem ipsum sed accumsan erat praesent faucibus commodo ac mi lacus. Adipiscing mi ac commodo. Vis aliquet tortor ultricies non ante erat nunc integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum.</p>
+									<p>We made our own implementation of a simple shape recognizer.</p>
+									<ul class="feature-icons">
+										<li class="fa-square">Squares are blue</li>
+										<li class="fa-caret-up">Triangles are red</li>
+										<li class="fa-bolt">Fast (enough)</li>
+										<li class="fa-android">Uses ROS</li>
+										<li class="fa-code">Written by real live college students</li>
+										<a href="https://github.com/audreywl/shape-recognition"><li class="fa-github">Check out our repo</a>
+									</ul>
 								</div>
 							</section>
 
 						<!-- Two -->
 							<section id="two">
 								<div class="container">
-									<h3>Things I Can Do</h3>
-									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer lorem ipsum dolor sit amet.</p>
-									<ul class="feature-icons">
-										<li class="fa-code">Write all the code</li>
-										<li class="fa-cubes">Stack small boxes</li>
-										<li class="fa-book">Read books and stuff</li>
-										<li class="fa-coffee">Drink much coffee</li>
-										<li class="fa-bolt">Lightning bolt</li>
-										<li class="fa-users">Shadow clone technique</li>
-									</ul>
+									<h3>Implementation</h3>
+
+									<h4>Edge Recognition</h4>
+									<p>The edge_detector() function is a very basic implementation of edge detection that functions by iterating through all the pixels in a provided image and marks pixels that have a substantial pixel change within one pixel of them as an 'edge'. The edges can then be passed to a contour detection algorithm or to the create_image() function to get back contours and a edge detected image respectively.</p>
+
+
+									<h4>Contour Finding</h4>
+									<p>The find_contours() algorithm ultimately takes in a list of key points from an image that it assumes are edges and creates a list of lists, where each list is a complete contour containing all the points that must be part of the contour. Currently its efficiency leaves something to be desired, and if we had more time for the project we would work to make it function in a reasonable amount of time so it could be used in the main program. It makes use of one helper function for finding the distance between two points.</p>
+
+
+									<h4>Shape Trainer</h4>
+									<p>shape_trainer() is probably the most interesting function that isn't directly run on the robot. Given an image, it reads the image using OpenCV, detects edges on it using Canny edge detection, feeds the edges into OpenCV's findContours(), and feeds the resulting contours into the Rieker Douglas Peuker algorithm we implemented. From there, the algorithm simplifies the given list of points down to the key, defining coordinates of the shape for each given contour. This is extremely important because we know we will always get the same number of key points for a square or triangle, regardless of size or rotation. We then examine the resulting list of lists containing key points and pull out the lengths of each contour of key points, which we define as shapes, and compare them to what we know the shapes are. For instance, we use this program on a picture of a square, and it returns the number 5, signaling to us that squares will have 5 key points. We then use this information to guide the shape_recognizer() code.</p>
+
+									<h4>Our recognizer running</h4>
+										<span class="image fit"><img src="images/banner.gif" alt="" /></span>
+
+									<pre><code>i = 0;
+
+	while (!deck.isInOrder()) {
+	    print 'Iteration ' + i;
+	    deck.shuffle();
+	    i++;
+	}
+
+	print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 								</div>
 							</section>
 
@@ -82,24 +94,18 @@
 									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer. Integer eu ante ornare amet commetus.</p>
 									<div class="features">
 										<article>
-											<a href="#" class="image"><img src="images/pic01.jpg" alt="" /></a>
+											<a href="#" class="image"><img src="images/Douglas-Peucker_animated.gif" alt="" /></a>
 											<div class="inner">
-												<h4>Possibly broke spacetime</h4>
-												<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer adipiscing ornare amet.</p>
+												<h4>Blog Post 1</h4>
+												<a href="http://comprobofinal.blogspot.com/2017/04/first-algorithm-implementation.html" class="button special">Go To Blog</a>
 											</div>
 										</article>
 										<article>
 											<a href="#" class="image"><img src="images/pic02.jpg" alt="" /></a>
 											<div class="inner">
-												<h4>Terraformed a small moon</h4>
+												<h4>Blog Post 2</h4>
 												<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer adipiscing ornare amet.</p>
-											</div>
-										</article>
-										<article>
-											<a href="#" class="image"><img src="images/pic03.jpg" alt="" /></a>
-											<div class="inner">
-												<h4>Snapped dark matter in the wild</h4>
-												<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer adipiscing ornare amet.</p>
+												<a href="http://comprobofinal.blogspot.com/2017/04/blog-post-2.html" class="button special">Go To Blog</a>
 											</div>
 										</article>
 									</div>
@@ -136,6 +142,7 @@
 
 						<!-- Five -->
 						<!--
+						
 							<section id="five">
 								<div class="container">
 									<h3>Elements</h3>
@@ -166,15 +173,7 @@
 										<h5>Blockquote</h5>
 										<blockquote>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan faucibus. Vestibulum ante ipsum primis in faucibus lorem ipsum dolor sit amet nullam adipiscing eu felis.</blockquote>
 										<h5>Preformatted</h5>
-										<pre><code>i = 0;
-
-	while (!deck.isInOrder()) {
-	    print 'Iteration ' + i;
-	    deck.shuffle();
-	    i++;
-	}
-
-	print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
+										
 									</section>
 
 									<section>
@@ -454,7 +453,7 @@
 									<section>
 										<h4>Image</h4>
 										<h5>Fit</h5>
-										<span class="image fit"><img src="images/banner.jpg" alt="" /></span>
+										<span class="image fit"><img src="images/banner.gif" alt="" /></span>
 										<div class="box alt">
 											<div class="row 50% uniform">
 												<div class="4u"><span class="image fit"><img src="images/pic01.jpg" alt="" /></span></div>
@@ -482,6 +481,7 @@
 						-->
 
 					</div>
+
 
 				<!-- Footer -->
 					<section id="footer">
