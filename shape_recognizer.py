@@ -20,18 +20,12 @@ class ShapeRecognizer(object):
         cv2.namedWindow('video_window')
         cv2.moveWindow('video_window', 600, 600)
         rospy.Subscriber("/camera/image_raw", Image, self.process_image)
-        #cv2.namedWindow('threshold_image')
         self.edge_detected = np.zeros((480,640))
         self.contour_image = np.zeros((480,640))
-        #cv2.createTrackbar('MinVal', 'threshold_image', 50, 300, self.set_minVal)
-        #cv2.createTrackbar('MaxVal', 'threshold_image', 87, 300, self.set_maxVal)
         self.minVal = 50
         self.maxVal = 87
         self.res = []
         self.test_image = cv2.imread("./square_base.png",-1)
-        # # if self.test_image:
-        # self.test_image = cv2.medianBlur(self.test_image,5)
-        #self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
 
 
 
@@ -100,34 +94,20 @@ class ShapeRecognizer(object):
         """ Process image messages from ROS and stash them in an attribute
             called cv_image for subsequent processing """
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-        #self.cv_image = cv2.medianBlur(self.cv_image,5)
-        #self.gray_image = cv2.adaptiveThreshold(self.cv_image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,2)
-        # self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
-
-
-
-        # self.binary_image = cv2.inRange(self.hsv_image, 
-        #     (25,176,77), 
-        #     (158,255,236))
         self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
         if cv2.__version__.startswith('3.'):
              _, self.contours,_  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         else:
             self.contours,_  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-        #self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
         self.contour_image = cv2.drawContours(self.cv_image, self.contours, -1, (0,255,0), 3)
-        #print len(self.contours)
         for i in range(len(self.contours)):
-            #if len(self.contours[i]) > 100:
             temp = self.dp(self.contours[i], 20)
             self.res.append(len(temp))
             if len(temp) == 7:
-                #print 'triangle!'
                 for i in range(0,len(temp)-1,2):
                     cv2.line(self.contour_image, (temp[i][0],temp[i][1]),(temp[i+1][0], temp[i+1][1]), (0,0,255), 5)
             if len(temp) == 5:
-                #print 's!'
                 for i in range(0,len(temp)-1,2):
                     cv2.line(self.contour_image, (temp[i][0],temp[i][1]),(temp[i+1][0], temp[i+1][1]), (255,0,0), 5)
 
@@ -152,7 +132,6 @@ class ShapeRecognizer(object):
                 #cv2.imshow('video_window', self.cv_image)
                 cv2.imshow('video_window2', self.contour_image)
                 cv2.waitKey(10)
-                #print self.res
             r.sleep()
 
 if __name__ == '__main__':

@@ -8,6 +8,10 @@ from edge_detector import edge_detector
 
 
 def distance(endpoints, point): 
+    """
+    Takes in the endpoints of a line as a list of lists and a point as a list of x,y coordinates.
+    Returns the distance between the line and the point as a float
+    """
     P1 = endpoints[0][0]
     P2 = endpoints[1][0]
 
@@ -42,10 +46,10 @@ def distance(endpoints, point):
 
 def dp(M, epsilon):
     """
-    Recursively simplifies an array of points using the RDP algorithm.
-    M: an array
-    epsilon: epsilon in the rdp algorithm
-    dist: distance function
+    A recursive implementation of the Rieker Douglas Peuker algorithm
+    Takes an array M containing the points the algorithm should analyze and streamline along with the epsilon, which is the tolerance for cutting off points.
+    Returns a new array of points that have been reduced to their most important values.
+    ie: if there are points along the same line, only the beginning and end points of the line will be kept.
     """
     dmax = 0.0
     index = -1
@@ -66,16 +70,17 @@ def dp(M, epsilon):
         return np.vstack((M[0], M[-1]))
 
 def shape_trainer(trainImage):
+    """
+    Diagnostic function responsible for figuring out the number of key points in a given shape. This is designed to be used in tandem with the shape_recognizer
+    function.
+    Takes in the path to an image
+    Returns the number of key points in each contour of the image as a list
+    """
     minVal = 50
     maxVal = 87
     test_image = cv2.imread(trainImage,-1)
     edge_path = edge_detector(trainImage)
     edge_detected = cv2.imread(edge_path,0)
-    # print edge_detected
-    # edge_detected = edge_detected.astype(np.float32)
-    # print edge_detected
-    # edge_detected = cv2.cvtColor(edge_detected,cv2.COLOR_BGR2GRAY)
-    # edge_detected = cv2.Canny(test_image,minVal,maxVal)
     if cv2.__version__.startswith('3.'):
          _, contours, contour_hierarchy  = cv2.findContours(edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     else:
@@ -91,7 +96,6 @@ def shape_trainer(trainImage):
             cv2.waitKey(0)
         
         res.append(len(temp))
-        # res.append(temp)
         
     return res
 
