@@ -5,6 +5,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
+import math
 
 class ShapeRecognizer(object):
     """ This robot should recognize shapes """
@@ -13,60 +14,94 @@ class ShapeRecognizer(object):
     def __init__(self):
         """ Initialize the street sign reocgnizer """
         rospy.init_node('shape_recognizer')
-        self.cv_image = None                        # the latest image from the camera
-        self.hsv_image = None
+        self.cv_image = np.zeros((480,640))                        # the latest image from the camera
+        self.hsv_image = np.zeros((480,640))
         self.bridge = CvBridge()                    # used to convert ROS messages to OpenCV
         cv2.namedWindow('video_window')
+        cv2.moveWindow('video_window', 600, 600)
         rospy.Subscriber("/camera/image_raw", Image, self.process_image)
-        cv2.namedWindow('threshold_image')
-        self.edge_detected = None
-        cv2.createTrackbar('MinVal', 'threshold_image', 50, 300, self.set_minVal)
-        cv2.createTrackbar('MaxVal', 'threshold_image', 87, 300, self.set_maxVal)
+        #cv2.namedWindow('threshold_image')
+        self.edge_detected = np.zeros((480,640))
+        self.contour_image = np.zeros((480,640))
+        #cv2.createTrackbar('MinVal', 'threshold_image', 50, 300, self.set_minVal)
+        #cv2.createTrackbar('MaxVal', 'threshold_image', 87, 300, self.set_maxVal)
         self.minVal = 50
         self.maxVal = 87
-        self.test_image = cv2.imread("./circle_base.png",-1)
-        # if self.test_image:
-        self.test_image = cv2.medianBlur(self.test_image,5)
-        self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
+        self.res = []
+        self.test_image = cv2.imread("./square_base.png",-1)
+        # # if self.test_image:
+        # self.test_image = cv2.medianBlur(self.test_image,5)
+        #self.edge_detected = cv2.Canny(self.test_image,self.minVal,self.maxVal)
 
 
 
-    def distance(endpoints, point):
+    def distance(self, endpoints, point):
         """computes the perpendicular distance between a point a line defined by two endpoints"""
-        start = endpoints[0]
-        end = endpoints[1]
-        dist_to_start = math.sqrt((point[0]-start[0])**2 + (point[1]-start[1])**2)
-        angle_of_big_line = math.atan2((end[1]-start[1]),(end[0]-start[0]))
-        angle_to_point = math.atan2((start[1]-point[1]),(start[0]-point[0]))
-        start_angle = angle_of_big_line-angle_to_point
-        perp_distance = dist_to_start*math.sin(start_angle)
-        return perp_distance
+        P1 = endpoints[0][0]
+        P2 = endpoints[1][0]
+
+        y3 = point[0][1]
+        x3 = point[0][0]
+        y1 = P1[1]
+        x1 = P1[0]
+        y2 = P2[1]
+        x2 = P2[0]
+
+        px = x2-x1
+        py = y2-y1
+
+        something = px*px + py*py
+
+        u =  ((x3 - x1) * px + (y3 - y1) * py) / float(something)
+
+        if u > 1:
+            u = 1
+        elif u < 0:
+            u = 0
+
+        x = x1 + u * px
+        y = y1 + u * py
+
+        dx = x - x3
+        dy = y - y3
+
+        dist = math.sqrt(dx*dx + dy*dy)
+
+        return dist
 
 
-    def dp(point_list, epsilon):
-        max_distance = 0
-        furthest_point = None
-        for i in point_list[1:-1]:
-            dist = distance((point_list[0],point_list[-1]), point_list[i])
-            if dist>max_distance:
-                max_distance = dist
-                furthest_point = i
-        if max_distance > epsilon:
-            new_line_1 = point_list[0:i+1]
-            new_line_2 = point_list[i:-1]
-            result_list_1 = dp(new_line_1, epsilon)
-            result_list_2 = dp(new_line_2, epsilon)
-            return result_list_1[0:-1].append(result_list_2)
+
+    def dp(self, M, epsilon):
+        """
+        Recursively simplifies an array of points using the RDP algorithm.
+        M: an array
+        epsilon: epsilon in the rdp algorithm
+        dist: distance function
+        """
+        dmax = 0.0
+        index = -1
+
+        for i in xrange(1, M.shape[0]):
+            d = self.distance((M[0],M[-1]),M[i])
+
+            if d > dmax:
+                index = i
+                dmax = d
+
+        if dmax > epsilon:
+            r1 = self.dp(M[:index + 1], epsilon)
+            r2 = self.dp(M[index:], epsilon)
+
+            return np.vstack((r1[:-1], r2))
         else:
-            return [point_list[0], point_list[-1]]
+            return np.vstack((M[0], M[-1]))
 
     def process_image(self, msg):
         """ Process image messages from ROS and stash them in an attribute
             called cv_image for subsequent processing """
         self.cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-        self.cv_image = cv2.medianBlur(self.cv_image,5)
-        self.gray_image = cv2.adaptiveThreshold(self.cv_image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv2.THRESH_BINARY,11,2)
+        #self.cv_image = cv2.medianBlur(self.cv_image,5)
+        #self.gray_image = cv2.adaptiveThreshold(self.cv_image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,2)
         # self.gray_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
 
 
@@ -74,11 +109,27 @@ class ShapeRecognizer(object):
         # self.binary_image = cv2.inRange(self.hsv_image, 
         #     (25,176,77), 
         #     (158,255,236))
-
         self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
-        _, self.contours, self.contour_hierarchy  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if cv2.__version__.startswith('3.'):
+             _, self.contours,_  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        else:
+            self.contours,_  = cv2.findContours(self.edge_detected, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+        #self.edge_detected = cv2.Canny(self.cv_image,self.minVal,self.maxVal)
         self.contour_image = cv2.drawContours(self.cv_image, self.contours, -1, (0,255,0), 3)
-        print dp(self.edge_detected, 1)
+        #print len(self.contours)
+        for i in range(len(self.contours)):
+            #if len(self.contours[i]) > 100:
+            temp = self.dp(self.contours[i], 20)
+            self.res.append(len(temp))
+            if len(temp) == 7:
+                #print 'triangle!'
+                for i in range(0,len(temp)-1,2):
+                    cv2.line(self.contour_image, (temp[i][0],temp[i][1]),(temp[i+1][0], temp[i+1][1]), (0,0,255), 5)
+            if len(temp) == 5:
+                #print 's!'
+                for i in range(0,len(temp)-1,2):
+                    cv2.line(self.contour_image, (temp[i][0],temp[i][1]),(temp[i+1][0], temp[i+1][1]), (255,0,0), 5)
 
 
     def set_minVal(self, val):
@@ -90,65 +141,6 @@ class ShapeRecognizer(object):
         self.maxVal = val
 
 
-        # left_top, right_bottom = self.sign_bounding_box()
-        # left, top = left_top
-        # right, bottom = right_bottom
-
-        # # crop bounding box region of interest
-        # self.cropped_sign = self.cv_image[top:bottom, left:right]
-
-        # # draw bounding box rectangle
-        # cv2.rectangle(self.cv_image, left_top, right_bottom, color=(0, 0, 255), thickness=5)
-
-    # def sign_bounding_box(self):
-    #     """
-    #     Returns
-    #     -------
-    #     (left_top, right_bottom) where left_top and right_bottom are tuples of (x_pixel, y_pixel)
-    #         defining topleft and bottomright corners of the bounding box
-    #     """
-    #     #calculate contour and generate bounding rectangle
-    #     ret, thresh = cv2.threshold(self.binary_image,127,255,cv2.THRESH_BINARY)
-    #     contours, hierarchy = cv2.findContours(thresh, 1, 2)
-    #     cnts = sorted(contours, key = cv2.contourArea, reverse = True)[:10]
-    #     cnt = cnts[0]
-        
-
-
-    #     x,y,w,h = cv2.boundingRect(cnt)
-    #     print x,y,(x+w),(y+h)
-    #     left_top = (x, y)
-    #     right_bottom = (x+w, y+h)
-    #     return left_top, right_bottom
-
-
-
-    #callbacks for sliders
-    # def set_h_lb(self, val):
-    #     """ set hue lower bound """
-    #     self.hsv_lb[0] = val
-
-    # def set_s_lb(self, val):
-    #     """ set saturation lower bound """
-    #     self.hsv_lb[1] = val
-
-    # def set_v_lb(self, val):
-    #     """ set value lower bound """
-    #     self.hsv_lb[2] = val
-
-    # def set_h_ub(self, val):
-    #     """ set hue upper bound """
-    #     self.hsv_ub[0] = val
-
-    # def set_s_ub(self, val):
-    #     """ set saturation upper bound """
-    #     self.hsv_ub[1] = val
-
-    # def set_v_ub(self, val):
-    #     """ set value upper bound """
-    #     self.hsv_ub[2] = val
-
-
 
 
     def run(self):
@@ -157,9 +149,10 @@ class ShapeRecognizer(object):
         while not rospy.is_shutdown():
 
             if not self.cv_image is None:
-                cv2.imshow('video_window', self.cv_image)
+                #cv2.imshow('video_window', self.cv_image)
                 cv2.imshow('video_window2', self.contour_image)
-                cv2.waitKey(5)
+                cv2.waitKey(10)
+                #print self.res
             r.sleep()
 
 if __name__ == '__main__':
