@@ -70,11 +70,16 @@
 
 
 									<h4>Shape Trainer</h4>
-									<p>shape_trainer() is probably the most interesting function that isn't directly run on the robot. Given an image, it reads the image using OpenCV, detects edges on it using Canny edge detection, feeds the edges into OpenCV's findContours(), and feeds the resulting contours into the Rieker Douglas Peuker algorithm we implemented. From there, the algorithm simplifies the given list of points down to the key, defining coordinates of the shape for each given contour. This is extremely important because we know we will always get the same number of key points for a square or triangle, regardless of size or rotation. We then examine the resulting list of lists containing key points and pull out the lengths of each contour of key points, which we define as shapes, and compare them to what we know the shapes are. For instance, we use this program on a picture of a square, and it returns the number 5, signaling to us that squares will have 5 key points. We then use this information to guide the shape_recognizer() code.</p>
+									<p>shape_trainer() is probably the most interesting function that isn't directly run on the robot. Given an image, it reads the image using OpenCV, detects edges on it using Canny edge detection, feeds the edges into OpenCV's findContours(), and feeds the resulting contours into the Ramer Douglas Peuker algorithm we implemented. From there, the algorithm simplifies the given list of points down to the key, defining coordinates of the shape for each given contour. This is extremely important because we know we will always get the same number of key points for a square or triangle, regardless of size or rotation. We then examine the resulting list of lists containing key points and pull out the lengths of each contour of key points, which we define as shapes, and compare them to what we know the shapes are. For instance, we use this program on a picture of a square, and it returns the number 5, signaling to us that squares will have 5 key points. We then use this information to guide the shape_recognizer() code.</p>
 
-									<h4>Our recognizer running</h4>
+									<h4>Shape Recognizer</h4>
+									<p>shape_recognizer() is the node that runs and interfaces with an actual Neato robot. It subscribes to the robot's video feed, runs those images through OpenCV's edge and contour detection algorithms, and the through our Ramer Douglas Peuker implementation. Unfortunately, our edge and contour detection algorithms aren't efficient enough to be used with the actual robot. The node displays the image with contours, and when it detects that one of these contours has the appropriate amount of key points for a known shape, draws it on the image. For a square, it highlights it in blue, and for a triangle, in red.</p>
+
+
+									<h4>Shape Recognizer running</h4>
 										<span class="image fit"><img src="images/banner.gif" alt="" /></span>
 
+									<!--
 									<pre><code>i = 0;
 
 	while (!deck.isInOrder()) {
@@ -84,14 +89,16 @@
 	}
 
 	print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
+									-->
+									<h4>Ramer Douglas Peucker</h4>
+									<p>The Ramer Douglas Peucker algorithm is what we use for finding the number of keypoints along a contour. The algorithm takes two parameters - an ordered list of points, which we found using OpenCV's contours, and "epsilon" which controls how closely to the shape to the contours. The algorithm start by calculating the line segment between the two endpoints. It uses the "distance" function to find the point on the contour that is the furthest distance away from this hypothetical line sement. Then, it splits the line into two new lines bounded by the endpoints and the new point. It calls the algorithm again with these new lines. The recursion terminates when the furthest point away is too close to matter, which is defined by being closer than the distance epsilon. Then, it passes back up through all the layers the enpoints that it has terminated on, and we're able to use those keypoints to describe the contour.</p>
 								</div>
 							</section>
 
 						<!-- Three -->
 							<section id="three">
 								<div class="container">
-									<h3>A Few Accomplishments</h3>
-									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer. Integer eu ante ornare amet commetus.</p>
+									<h3>Project Updates</h3>
 									<div class="features">
 										<article>
 											<a href="#" class="image"><img src="images/Douglas-Peucker_animated.gif" alt="" /></a>
@@ -104,7 +111,6 @@
 											<a href="#" class="image"><img src="images/pic02.jpg" alt="" /></a>
 											<div class="inner">
 												<h4>Blog Post 2</h4>
-												<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer adipiscing ornare amet.</p>
 												<a href="http://comprobofinal.blogspot.com/2017/04/blog-post-2.html" class="button special">Go To Blog</a>
 											</div>
 										</article>
@@ -112,7 +118,9 @@
 								</div>
 							</section>
 
+
 						<!-- Four -->
+						<!--
 							<section id="four">
 								<div class="container">
 									<h3>Contact Me</h3>
@@ -139,9 +147,7 @@
 									</form>
 								</div>
 							</section>
-
-						<!-- Five -->
-						<!--
+						
 						
 							<section id="five">
 								<div class="container">
